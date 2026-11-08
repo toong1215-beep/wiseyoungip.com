@@ -21,6 +21,10 @@ SRC = ROOT / "src"
 DIST = ROOT / "dist"
 SITE_URL = "https://wiseyoungip.com"
 
+# 검색 노출 스위치. 정식 개시 전에는 False: 모든 페이지에 noindex를 넣고 robots.txt로 수집을 막는다.
+# 개시할 때 True로 바꾸고 빌드·배포하면 검색에 열린다.
+ALLOW_INDEXING = False
+
 OFFICE = {
     "phone": "010-9284-2623",
     "phone_href": "tel:01092842623",
@@ -141,6 +145,7 @@ def layout(meta: dict, body: str, url_path: str) -> str:
         f"{title} | 와이즈영 특허사무소" if lang == "ko" else f"{title} | WISEYOUNG IP")
     desc = html.escape(meta.get("description", ""), quote=True)
     alt_href = meta.get("alt", "/en/" if lang == "ko" else "/")
+    robots_meta = "" if ALLOW_INDEXING else '<meta name="robots" content="noindex, nofollow">\n'
     return f"""<!doctype html>
 <html lang="{lang}">
 <head>
@@ -148,7 +153,7 @@ def layout(meta: dict, body: str, url_path: str) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(full_title)}</title>
 <meta name="description" content="{desc}">
-<link rel="canonical" href="{SITE_URL}{url_path}">
+{robots_meta}<link rel="canonical" href="{SITE_URL}{url_path}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{html.escape(full_title, quote=True)}">
 <meta property="og:description" content="{desc}">
@@ -225,7 +230,12 @@ def main():
     if DIST.exists():
         shutil.rmtree(DIST)
     shutil.copytree(SRC / "assets", DIST / "assets")
-    for name in ("robots.txt", "_headers", "CNAME"):
+    if ALLOW_INDEXING:
+        robots = f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n"
+    else:
+        robots = "User-agent: *\nDisallow: /\n"
+    (DIST / "robots.txt").write_text(robots, encoding="utf-8")
+    for name in ("_headers", "CNAME"):
         if (SRC / name).exists():
             shutil.copy(SRC / name, DIST / name)
 

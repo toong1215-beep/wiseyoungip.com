@@ -32,6 +32,12 @@ python -m http.server 4321 --directory dist
 
 빌드하면 칼럼 목록, 메인의 최신 칼럼 3개, 사이트맵에 자동으로 들어갑니다. 블로그에는 요약과 홈페이지 링크를 올립니다.
 
+## 검색 노출 (지금은 차단)
+
+정식 개시 전이라 `build.py` 의 `ALLOW_INDEXING = False` 로 두었습니다. 모든 페이지에 `noindex` 가 들어가고 `robots.txt` 가 수집을 막습니다. 주소를 아는 사람은 여전히 접속할 수 있습니다.
+
+개시할 때: `ALLOW_INDEXING = True` 로 바꾸고 올린 뒤, 구글 서치 콘솔과 네이버 서치어드바이저에 사이트와 `sitemap.xml` 을 등록합니다.
+
 ## 오픈 전에 할 일
 
 1. **상담 폼 키 발급**: https://web3forms.com 에서 admin@wiseyoungip.com 으로 무료 키를 받아, `src/pages/index.html` 과 `src/pages/en/index.html` 의 `YOUR_WEB3FORMS_ACCESS_KEY` 를 바꿉니다. 키가 없는 동안에는 폼이 메일 앱을 여는 방식으로 동작합니다.
