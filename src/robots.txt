@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://wiseyoungip.com/sitemap.xml
