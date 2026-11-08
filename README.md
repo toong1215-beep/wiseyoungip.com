@@ -35,8 +35,8 @@ python -m http.server 4321 --directory dist
 ## 오픈 전에 할 일
 
 1. **상담 폼 키 발급**: https://web3forms.com 에서 admin@wiseyoungip.com 으로 무료 키를 받아, `src/pages/index.html` 과 `src/pages/en/index.html` 의 `YOUR_WEB3FORMS_ACCESS_KEY` 를 바꿉니다. 키가 없는 동안에는 폼이 메일 앱을 여는 방식으로 동작합니다.
-2. **호스팅 연결**: GitHub 저장소에 올린 뒤 Cloudflare Pages(무료)에서 연결합니다. 빌드 명령 `python build.py`, 출력 폴더 `dist`.
-3. **도메인 연결**: wiseyoungip.com 을 Cloudflare Pages에 연결합니다. 이메일이 같은 도메인을 쓰므로 메일 설정(MX 레코드)은 건드리지 않습니다.
+2. **호스팅 (완료)**: GitHub Pages. 저장소 https://github.com/toong1215-beep/wiseyoungip.com 의 main 에 올리면 `.github/workflows/pages.yml` 이 `python build.py` 를 돌려 자동 배포합니다.
+3. **도메인 (완료)**: Squarespace DNS에 A 기록 4개(185.199.108~111.153)와 www CNAME(toong1215-beep.github.io)을 넣었습니다. 메일 기록(MX, SPF, DKIM)은 건드리지 않았습니다.
 4. **검색 등록**: 네이버 서치어드바이저, 구글 서치콘솔에 사이트와 `sitemap.xml` 을 등록합니다.
 
 ## 나중에 바꿀 것
