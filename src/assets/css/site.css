@@ -122,7 +122,8 @@ p { margin: 0 0 1em; }
 .hero-person { margin: 0; }
 .hero-person img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 4px; background: var(--mist); }
 .hero-person figcaption { margin-top: 14px; font-size: var(--t-sm); color: var(--ink-soft); line-height: 1.6; }
-.hero-person strong { display: block; color: var(--ink); font-family: var(--sans); font-size: var(--t-md); font-weight: 700; }
+.hero-person figcaption a { color: var(--ink); font-size: var(--t-md); font-weight: 700; text-decoration: none; }
+.hero-person figcaption a:hover { color: var(--action); text-decoration: underline; }
 /* 배경의 점 격자: 특허라는 '점'이 쌓이는 시간 축 */
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
