@@ -10,6 +10,7 @@ src/ 아래의 페이지 조각(HTML)에 공통 머리말·꼬리말을 씌워 d
 칼럼(src/column/*.html)은 date, category, summary 도 적는다.
 """
 
+import hashlib
 import html
 import json
 import re
@@ -43,6 +44,11 @@ OFFICE = {
     "address_ko": "서울 서초구 명달로 107, 5층 IP 비즈니스 센터 504호",
     "address_en": "Suite 504, IP Business Center 5F, 107 Myeongdal-ro, Seocho-gu, Seoul, Korea",
 }
+
+def asset_version(rel: str) -> str:
+    """파일 내용이 바뀌면 주소도 바뀌게 해서, 방문자 브라우저가 예전 CSS·JS를 쓰지 않게 한다."""
+    return hashlib.sha1((SRC / "assets" / rel).read_bytes()).hexdigest()[:8]
+
 
 META_RE = re.compile(r"^\s*<!--meta\s+(\{.*?\})\s*-->\s*", re.S)
 
@@ -231,7 +237,7 @@ def layout(meta: dict, body: str, url_path: str) -> str:
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/site.css?v={asset_version('css/site.css')}">
 {meta.get('head', '')}
 </head>
 <body class="{meta.get('body_class', '')}" data-page-type="{info['page_type']}">
@@ -241,7 +247,7 @@ def layout(meta: dict, body: str, url_path: str) -> str:
 {body}
 </main>
 {footer(lang)}
-<script src="/assets/js/site.js" defer></script>
+<script src="/assets/js/site.js?v={asset_version('js/site.js')}" defer></script>
 </body>
 </html>
 """
