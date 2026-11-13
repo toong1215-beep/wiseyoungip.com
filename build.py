@@ -25,6 +25,16 @@ SITE_URL = "https://wiseyoungip.com"
 # 개시할 때 True로 바꾸고 빌드·배포하면 검색에 열린다.
 ALLOW_INDEXING = False
 
+# 구글 애널리틱스 4 측정 ID (G-로 시작). 비워 두면 추적 코드를 넣지 않는다.
+# 실제 도메인(wiseyoungip.com)에서만 수집하고, 로컬 미리보기에서는 주소 끝에 ?ga_debug=1 을 붙였을 때만
+# DebugView 전용으로 보낸다. 변리사 본인 방문은 한 번 ?ga_internal=1 로 들어오면 그 브라우저가 '내부 트래픽'으로 표시된다.
+GA_MEASUREMENT_ID = "G-775SNGV6VX"
+
+PRACTICE_AREAS = {
+    "patent": "특허·실용신안", "startup": "스타트업 IP 지원", "trademark": "상표",
+    "design": "디자인", "overseas": "해외출원", "dispute": "심판·분쟁",
+}
+
 OFFICE = {
     "phone": "010-9284-2623",
     "phone_href": "tel:01092842623",
@@ -138,6 +148,57 @@ def footer(lang: str) -> str:
 </div>"""
 
 
+def page_info(meta: dict, url_path: str) -> dict:
+    """GA4 콘텐츠 그룹과 페이지 구분 값. 보고서에서 페이지를 묶어 보는 기준이 된다."""
+    lang = meta.get("lang", "ko")
+    info = {"page_type": "other", "content_group": "기타", "site_language": lang}
+    if url_path == "/":
+        info.update(page_type="home", content_group="메인")
+    elif url_path == "/en/":
+        info.update(page_type="home_en", content_group="영문")
+    elif url_path == "/attorney.html":
+        info.update(page_type="attorney", content_group="변리사 소개")
+    elif url_path == "/fees.html":
+        info.update(page_type="fees", content_group="비용 안내")
+    elif url_path == "/privacy.html":
+        info.update(page_type="privacy", content_group="개인정보처리방침")
+    elif url_path == "/column/":
+        info.update(page_type="column_list", content_group="칼럼 목록")
+    elif url_path.startswith("/column/"):
+        info.update(page_type="column_article", content_group="칼럼",
+                    column_title=meta["title"], column_category=meta.get("category", ""))
+    elif url_path.startswith("/practice/"):
+        slug = url_path.rsplit("/", 1)[-1].removesuffix(".html")
+        info.update(page_type="practice", content_group="업무분야",
+                    practice_area=PRACTICE_AREAS.get(slug, slug))
+    return info
+
+
+def ga_tag(info: dict) -> str:
+    if not GA_MEASUREMENT_ID:
+        return ""
+    cfg = json.dumps({"id": GA_MEASUREMENT_ID, "page": info}, ensure_ascii=False).replace("</", "<\\/")
+    return f"""<script>window.WY_GA={cfg};</script>
+<script>
+(function(){{
+  var c=window.WY_GA,q=location.search,prod=/(^|\\.)wiseyoungip\\.com$/.test(location.hostname),dbg=/[?&]ga_debug=1/.test(q);
+  if(!prod&&!dbg)return;
+  function ls(k,v){{try{{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}}catch(e){{}}}}
+  if(/[?&]ga_internal=1/.test(q))ls('wy_internal','1');
+  if(/[?&]ga_internal=0/.test(q))ls('wy_internal',null);
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){{dataLayer.push(arguments);}};
+  gtag('js',new Date());
+  var p={{}};for(var k in c.page)p[k]=c.page[k];
+  if(ls('wy_internal')==='1')p.traffic_type='internal';
+  gtag('set',p);
+  gtag('config',c.id,dbg?{{debug_mode:true}}:{{}});
+  var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+c.id;document.head.appendChild(s);
+}})();
+</script>
+"""
+
+
 def layout(meta: dict, body: str, url_path: str) -> str:
     lang = meta.get("lang", "ko")
     title = meta["title"]
@@ -146,12 +207,13 @@ def layout(meta: dict, body: str, url_path: str) -> str:
     desc = html.escape(meta.get("description", ""), quote=True)
     alt_href = meta.get("alt", "/en/" if lang == "ko" else "/")
     robots_meta = "" if ALLOW_INDEXING else '<meta name="robots" content="noindex, nofollow">\n'
+    info = page_info(meta, url_path)
     return f"""<!doctype html>
 <html lang="{lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(full_title)}</title>
+{ga_tag(info)}<title>{html.escape(full_title)}</title>
 <meta name="description" content="{desc}">
 {robots_meta}<link rel="canonical" href="{SITE_URL}{url_path}">
 <meta property="og:type" content="website">
@@ -166,7 +228,7 @@ def layout(meta: dict, body: str, url_path: str) -> str:
 <link rel="stylesheet" href="/assets/css/site.css">
 {meta.get('head', '')}
 </head>
-<body class="{meta.get('body_class', '')}">
+<body class="{meta.get('body_class', '')}" data-page-type="{info['page_type']}">
 <a class="skip" href="#main">{'본문으로 건너뛰기' if lang == 'ko' else 'Skip to content'}</a>
 {header(lang, alt_href)}
 <main id="main">
