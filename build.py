@@ -189,10 +189,13 @@ def ga_tag(info: dict) -> str:
   window.dataLayer=window.dataLayer||[];
   window.gtag=function(){{dataLayer.push(arguments);}};
   gtag('js',new Date());
+  // 현재 Google 태그는 set/config 의 맞춤 값을 이벤트에 붙여 주지 않으므로, 모든 이벤트에 직접 붙인다(site.js 의 track 도 같은 값을 쓴다).
   var p={{}};for(var k in c.page)p[k]=c.page[k];
   if(ls('wy_internal')==='1')p.traffic_type='internal';
-  gtag('set',p);
-  gtag('config',c.id,dbg?{{debug_mode:true}}:{{}});
+  if(dbg)p.debug_mode=true;
+  window.WY_GA_PARAMS=p;
+  gtag('config',c.id,{{send_page_view:false}});
+  gtag('event','page_view',p);
   var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+c.id;document.head.appendChild(s);
 }})();
 </script>

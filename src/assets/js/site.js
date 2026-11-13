@@ -7,7 +7,10 @@
   var pageType = document.body.getAttribute('data-page-type') || 'other';
   function track(name, params) {
     if (typeof window.gtag !== 'function') return;
-    window.gtag('event', name, params || {});
+    var all = {}, base = window.WY_GA_PARAMS || {}, k;
+    for (k in base) all[k] = base[k];
+    for (k in params || {}) all[k] = params[k];
+    window.gtag('event', name, all);
   }
   function clip(s) { return (s || '').replace(/\s+/g, ' ').trim().slice(0, 100); }
   // 클릭이 일어난 화면 위치: header / footer / quick_contact / 섹션 id / hero / body
