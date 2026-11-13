@@ -38,6 +38,15 @@ python -m http.server 4321 --directory dist
 
 개시할 때: `ALLOW_INDEXING = True` 로 바꾸고 올린 뒤, 구글 서치 콘솔과 네이버 서치어드바이저에 사이트와 `sitemap.xml` 을 등록합니다.
 
+## 방문 통계 (구글 애널리틱스 4)
+
+측정 ID `G-775SNGV6VX` 가 `build.py` 의 `GA_MEASUREMENT_ID` 에 들어 있습니다. wiseyoungip.com 에서만 수집합니다.
+
+- **내 방문 빼기**: 쓰는 브라우저마다 한 번 `https://wiseyoungip.com/?ga_internal=1` 로 들어오면 그 브라우저는 수집하지 않습니다. 되돌리려면 `?ga_internal=0`.
+- **로컬에서 시험**: 미리보기 주소 끝에 `?ga_debug=1` 을 붙이면 전송되고, 사이트 이벤트는 GA의 DebugView 에서 볼 수 있습니다.
+- **사이트가 보내는 이벤트** (`src/assets/js/site.js`): 상담 접수 `generate_lead`, 전화·메일 클릭 `click_phone`·`click_email`, 버튼 `cta_click`, 업무분야·칼럼 클릭 `practice_click`·`column_click`, 칼럼 읽음 `column_read`(25·50·75·100%), 메인 구역 도달 `section_view`, 폼 `form_start`·`inquiry_field_select`·`form_error`, 메뉴 `nav_click`·`language_switch`·`mobile_menu_open`. 모든 이벤트에 페이지 유형(`page_type`)과 콘텐츠 그룹이 붙습니다.
+- 페이지뷰·스크롤·외부 링크 클릭은 GA가 자동으로 잡습니다.
+
 ## 오픈 전에 할 일
 
 1. **상담 폼 키 발급**: https://web3forms.com 에서 admin@wiseyoungip.com 으로 무료 키를 받아, `src/pages/index.html` 과 `src/pages/en/index.html` 의 `YOUR_WEB3FORMS_ACCESS_KEY` 를 바꿉니다. 키가 없는 동안에는 폼이 메일 앱을 여는 방식으로 동작합니다.

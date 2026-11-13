@@ -26,8 +26,9 @@ SITE_URL = "https://wiseyoungip.com"
 ALLOW_INDEXING = False
 
 # 구글 애널리틱스 4 측정 ID (G-로 시작). 비워 두면 추적 코드를 넣지 않는다.
-# 실제 도메인(wiseyoungip.com)에서만 수집하고, 로컬 미리보기에서는 주소 끝에 ?ga_debug=1 을 붙였을 때만
-# DebugView 전용으로 보낸다. 변리사 본인 방문은 한 번 ?ga_internal=1 로 들어오면 그 브라우저가 '내부 트래픽'으로 표시된다.
+# 실제 도메인(wiseyoungip.com)에서만 수집한다. 로컬 미리보기에서는 주소 끝에 ?ga_debug=1 을 붙였을 때만 보내고,
+# 사이트 이벤트에 debug_mode 를 붙여 DebugView 에서 볼 수 있게 한다.
+# 변리사 본인 브라우저는 한 번 ?ga_internal=1 로 들어오면 그 뒤로 수집하지 않는다(?ga_internal=0 으로 해제).
 GA_MEASUREMENT_ID = "G-775SNGV6VX"
 
 PRACTICE_AREAS = {
@@ -186,16 +187,18 @@ def ga_tag(info: dict) -> str:
   function ls(k,v){{try{{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}}catch(e){{}}}}
   if(/[?&]ga_internal=1/.test(q))ls('wy_internal','1');
   if(/[?&]ga_internal=0/.test(q))ls('wy_internal',null);
+  // 변리사 본인 브라우저(?ga_internal=1 로 한 번 표시)는 아예 수집하지 않는다.
+  // 자동 이벤트(page_view, scroll 등)에는 내부 트래픽 표시를 붙일 수 없어서 GA 필터만으로는 다 걸러지지 않는다.
+  if(ls('wy_internal')==='1'&&!dbg)return;
   window.dataLayer=window.dataLayer||[];
   window.gtag=function(){{dataLayer.push(arguments);}};
   gtag('js',new Date());
-  // 현재 Google 태그는 set/config 의 맞춤 값을 이벤트에 붙여 주지 않으므로, 모든 이벤트에 직접 붙인다(site.js 의 track 도 같은 값을 쓴다).
+  // 현재 Google 태그는 set/config 의 맞춤 값과 send_page_view:false 를 무시한다.
+  // page_view 는 태그가 자동으로 보내고, 페이지 구분 값은 site.js 의 track 이 사이트 이벤트마다 직접 붙인다.
   var p={{}};for(var k in c.page)p[k]=c.page[k];
-  if(ls('wy_internal')==='1')p.traffic_type='internal';
   if(dbg)p.debug_mode=true;
   window.WY_GA_PARAMS=p;
-  gtag('config',c.id,{{send_page_view:false}});
-  gtag('event','page_view',p);
+  gtag('config',c.id);
   var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+c.id;document.head.appendChild(s);
 }})();
 </script>
